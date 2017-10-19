@@ -1,0 +1,2 @@
+# fakesockets
+AJAX Based Sockets
