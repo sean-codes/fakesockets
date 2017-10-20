@@ -6,36 +6,13 @@
 
    // Read Data
    $uid = $_GET["uid"];
+   error_log($_GET["data"]);
    $data = json_decode($_GET["data"]);
 
-   $connect = new Connect($uid);
-   $message = new Messages($connect, $data);
-
-   class Messages {
-      // Messages
-
-      private $connect;
-      private $data;
-
-      function __construct($connect, $data){
-         $this->connect = $connect;
-         $this->data = $data;
-         error_log('Incoming Data: ' . json_encode($data));
-         $this->parse();
+   $connect = new Connect($uid, $data, array(
+      'test'=> function($connect, $data){
+         $packet = Array( 'method'=>'test', 'data'=>$data );
+         $connect->broadcast($packet);
       }
-
-      function parse(){
-         $method = 'method_' . $this->data->method;
-         $this->$method();
-      }
-
-      function method_poll(){
-         $this->connect->listen();
-      }
-
-      function method_data(){
-         $packet = Array( 'method'=>'test', 'data'=>'wtf' );
-         $this->connect->broadcast($packet);
-      }
-   }
+   ));
 ?>

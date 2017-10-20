@@ -10,15 +10,28 @@ class Connect {
 	private $sockets_folder;
 	private $socket;
 	private $timeout = 5;
+	private $messages;
+	private $data;
 
-	public function __construct($socket){
-		$this->network = new Network();
+	public function __construct($socket, $data, $methods){
+		$this->data = $data;
+		$this->methods = $methods;
 		$this->socketID = $socket;
 		$this->sockets_folder = dirname(__FILE__) . "/Sockets/";
 		$this->socket =  $this->sockets_folder . $this->socketID;
-
 		$this->socket_init();
+		$this->parse();
 		return;
+	}
+
+	private function parse(){
+		if(empty($this->data)){
+			$this->listen();
+		} else {
+			$method = $this->data->method;
+			error_log($method);
+			$this->methods[$method]($this, $this->data);
+		}
 	}
 
 	public function listen(){
@@ -47,16 +60,25 @@ class Connect {
 		echo $this->packet( $data );
 	}
 
-	private function broadcast($data){
+	public function broadcast($data){
 		$sockets = $this->get_sockets();
 		foreach($sockets as $socket){
 			$this->writeSocket($socket, $data);
 		}
-		$line = $this->packet( $data );
+		error_log('broadcasting');
+	}
+
+	private function get_sockets(){
+		$sockets = array_diff(scandir($this->sockets_folder), array('..', '.'));
+		foreach($sockets as $key=>$val){ $sockets[$key] = $this->sockets_folder . $val; }
+		return $sockets;
 	}
 
 	private function writeSocket($socket, $data){
-		$file = fopen($socket, $test);
+		error_log('writing to socket: ' . $socket);
+		$file = fopen($socket, 'a');
+		fwrite($file, $this->packet( $data ));
+		fclose($file);
 	}
 
 	private function packet($data){
