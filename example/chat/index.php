@@ -8,6 +8,7 @@
       <script>
          var connect = new Connect({
             serverPath: 'server.php',
+            room: '0',
             methods: {
                test: function(data){
                   console.log('testing: ', data)

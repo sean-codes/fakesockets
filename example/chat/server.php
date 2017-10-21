@@ -6,10 +6,10 @@
 
    // Read Data
    $uid = $_GET["uid"];
-   error_log($_GET["data"]);
+   $room = $_GET["room"];
    $data = json_decode($_GET["data"]);
 
-   $connect = new Connect($uid, $data, array(
+   $connect = new Connect($uid, $room, $data, array(
       'test'=> function($connect, $data){
          $packet = Array( 'method'=>'test', 'data'=>$data );
          $connect->broadcast($packet);
