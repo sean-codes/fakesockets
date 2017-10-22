@@ -2,27 +2,19 @@
 
 <html>
 	<head>
-			<title>Cube-Script</title>
-			<link rel="stylesheet" type="text/css" href="css.css" />
-		
-			<!-- Load Objects and Sprites -->
-			<?php include 'scr_load.php'; ?>
+		<title>Cube-Script</title>
+		<link rel="stylesheet" type="text/css" href="css.css" />
 	</head>
 	<body>
+		<!-- Create Canvas -->
+		<canvas tabindex='10' width="500" height="200" id="canvas"></canvas>
 
-			<!--Create canvas-->
-			<canvas width="500" height="200" id="canvas"></canvas>
+		<!-- Load Images -->
+		<img src="player.png">
 
-			<script type="text/javascript">
-					cube_script();   
-					//Create objects
-					x = 0;
-					while( x < canvas.width){
-							create(obj_block, x, canvas.height - obj_block.height);
-							x += obj_block.width;
-					}
-					create(obj_player, 20, 20);  
-					create(obj_console, 0, 0);
-			</script>
+		<!-- Initiate -->
+		<script src='../../lib/client/Connect.js'></script>
+		<script src='scripts.js'></script>
+		<script> game.init() </script>
 	</body>
 </html>

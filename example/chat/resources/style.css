@@ -1,0 +1,86 @@
+content, content *, content *:after, content *:before{
+   position:relative;
+   display:block;
+   padding:0;
+   margin:0;
+   border:none;
+}
+
+messenger{
+   max-width:600px;
+   margin:40px auto;
+   padding:20px;
+   background:#405E98;
+   border-radius:3px;
+}
+
+messenger messages{
+   width:100%;
+   height: 150px;
+   overflow:auto;
+   min-height:150px;
+   background:rgba(0, 0, 0, 0.5);
+   box-shadow:inset 0px 0px 10px rgba(0, 0, 0, 0.25);
+}
+messenger messages message{
+   color:#DDD;
+   padding:5px 10px;
+   font-family: Arial;
+   font-size:12px;
+   display:flex;
+}
+
+messenger messages message text{
+   flex:1;
+}
+
+messenger messages message name{
+   width: 80px;
+   text-overflow: ellipsis;
+   overflow: hidden;
+}
+
+messenger inputs{
+   display:flex;
+   height:60px;
+}
+messenger inputs [name=name]{
+   width:100px;
+   display:block;
+   outline:none;
+   background:#222;
+   color:#FFF;
+   text-align:center;
+   margin:20px 10px 0px 0px;
+   border-radius:2px;
+}
+
+messenger inputs [name=name]:after{
+   content:'👩‍🚀';
+   position:absolute;
+   top:50px;
+   left:50px;
+   background:black;
+   transform:translateX(-50%) translateY(-50%);
+   z-index:1000;
+}
+
+messenger inputs [name=input]{
+   flex:1;
+   padding:0px 10px;
+   outline:none;
+   background:#222;
+   color:#FFF;
+   border-radius:2px;
+   margin:20px 10px 0px 10px;
+}
+
+messenger inputs [type=button]{
+   background:#222;
+   border:none;
+   width: 60px;
+   border-radius:2px;
+   text-transform:uppercase;
+   color:#FFF;
+   margin:20px 0px 0px 10px;
+}
