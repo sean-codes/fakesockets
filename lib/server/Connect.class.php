@@ -8,18 +8,24 @@ class Connect {
 	private $path_rooms;
 	private $path_room;
 	private $timeout = 5;
-	private $messages;
+	private $connect;
+	private $disconnect;
+	private $methods;
 	private $data;
 	private $room;
+	private $speed;
 
-	public function __construct($socket, $room, $data, $path, $methods) {
-		$this->path = $path;
-		$this->path_rooms = "$path/";
-		$this->path_room = $this->path_rooms . $room . '/';
-		$this->socket = $socket;
-		$this->methods = $methods;
-		$this->room = $room;
-		$this->data = $data;
+	public function __construct($settings) {
+		$this->path = $settings['path'];
+		$this->path_rooms = "{$this->path}/";
+		$this->path_room = $this->path_rooms . $settings['room'] . '/';
+		$this->socket = $settings['socket'];
+		$this->connect = $settings['connect'];
+		$this->disconnect = $settings['disconnect'];
+		$this->methods = $settings['methods'];
+		$this->room = $settings['room'];
+		$this->data = $settings['data'];
+		$this->speed = $settings['speed'];
 
 		$this->room_create($this->path_room);
 		$this->socket_init();
@@ -32,7 +38,7 @@ class Connect {
 			$this->data_listen();
 		} else {
 			$method = $this->data->method;
-			$this->methods[$method]($this, $this->data);
+			$this->methods[$method]($this, $this->socket, $this->data);
 		}
 	}
 
@@ -40,7 +46,7 @@ class Connect {
 		$path_socket = $this->path_room . $this->socket;
 		$maxTimeout = $this->timeout + time();
 		while($this->data_check( $path_socket ) && $maxTimeout > time()){
-			usleep(1000000);
+			usleep(1000000*$this->speed);
 		}
 	}
 
@@ -68,9 +74,19 @@ class Connect {
 		}
 	}
 
+	public function multicast( $data ) {
+		$sockets = $this->get_sockets($this->room);
+		foreach($sockets as $socket){
+			if($this->socket != $socket){
+				$this->socket_write($socket, $data);
+			}
+		}
+	}
+
 	private function socket_write($socket, $data) {
 		// Open file and read last poll
 		$file_socket = fopen($this->path_room . $socket, 'r+');
+		flock($file_socket, LOCK_EX);
 		$socket_last_poll = time() - fread($file_socket, 10);
 
 		// Send
@@ -84,9 +100,15 @@ class Connect {
 
 	private function socket_init() {
 		$this->room_set();
+		$newSocket = !file_exists($this->path_room . $this->socket);
 		$file = fopen($this->path_room . $this->socket, 'c');
 		fwrite($file, time());
 		fclose($file);
+
+		if($newSocket){
+			error_log('new socket');
+			call_user_func_array($this->connect, [ $this, $this->socket, $this->data ]);
+		}
 	}
 
 	private function room_create($path_room) {
