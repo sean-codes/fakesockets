@@ -3,12 +3,22 @@ var connect = new Connect({
 	room: '0',
 	methods: {
 		message: function(data){
-			html.messages.innerHTML += `<message><name>${data.name}</name><text>: ${data.input}</text></message>`
-			html.messages.scrollTop = html.messages.scrollHeight
+			for(var player of game.objects){
+				if(player.uid == data.uid){
+					player.keys = data.keys
+					return;
+				}
+			}
+
+			var newPlayer = new Player(10, 10)
+			newPlayer.uid = data.uid
+			newPlayer.ghost = true
+			newPlayer.keys = data.keys
+			console.log('new player: ' + data.uid)
+			game.objects.push(newPlayer)
 		}
 	}
 })
-
 
 var game = {
 	ctx: document.querySelector('canvas').getContext('2d'),
@@ -16,7 +26,7 @@ var game = {
 	keys: [],
 	init: function(){
 		this.listen()
-		this.objects.push(new player(10, 10))
+		this.objects.push(new Player(10, 10))
 
 		this.render()
 	},
@@ -39,13 +49,16 @@ var game = {
 			this.ctx.drawImage(object.img, object.x, object.y)
 		}
 	},
+	findObject: function(){
+
+	},
 	resetKeys: function(){
 		var that = this
 		this.keys.forEach(function(e, i){ console.log(e); that.keys[i] = false })
 	}
 }
 
-var player = function(x, y){
+var Player = function(x, y){
 	this.img = document.querySelector('img')
 	this.x = x
 	this.y = y
@@ -54,8 +67,17 @@ var player = function(x, y){
 	this.hspeed = 0
 	this.vspeed = 1
 	this.network = ''
+	this.ghost = false
+	this.keys = {}
 
 	this.step = function(){
+
+		keys = this.ghost ? this.keys : {
+			up: game.keys[38],
+			right: game.keys[39],
+			left: game.keys[37]
+		}
+
 		if(this.y + this.height + this.vspeed <= game.ctx.canvas.height){
 			if(this.vspeed < 6){
 				this.vspeed += 0.5
@@ -63,22 +85,23 @@ var player = function(x, y){
 			this.y += this.vspeed
 		} else {
 			this.vspeed = 0
-			if(game.keys[38]){
+			if(keys.up){
 				this.vspeed = -10
 				this.y -= 2;
 			}
 		}
 
-		if(game.keys[39] && this.x+this.width < game.ctx.canvas.width){
+		if(keys.right && this.x+this.width < game.ctx.canvas.width){
 			this.x += 2;
 		}
 
-		if(game.keys[37] && this.x > 0){ this.x -= 2; }
+		if(keys.left && this.x > 0){ this.x -= 2; }
 
 		var newNetwork = game.keys[38]+'_'+game.keys[39]+'_'+game.keys[37]
-		if(newNetwork !== this.network){
+		if(this.network != newNetwork){
 			this.network = newNetwork
+			connect.send({method: 'message', data: { keys: keys, uid: this.uid }})
+			console.log(newNetwork, this.network)
 		}
-		console.log(newNetwork)
 	}
 }
