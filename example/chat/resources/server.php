@@ -5,15 +5,18 @@
    require '../../../lib/server/Connect.class.php';
 
    // Read Data
-   $uid = $_GET["uid"];
-   $room = $_GET["room"];
-   $data = json_decode($_GET["data"]);
-   $path = 'Activity';
-
-   // Do the darn thing!
-   $connect = new Connect($uid, $room, $data, $path, array(
-      'message'=> function($connect, $data){
-         $connect->broadcast($data);
-      }
-   ));
+   $connect = new Connect([
+      'room' => $_GET['room'],
+      'socket' => $_GET['socket'],
+      'data' => json_decode($_GET['data']),
+      'path' => 'Activity',
+      'speed' => 1/30,
+      'methods' => [
+         'message' => function($connect, $socket, $data) {
+            $connect->broadcast($data);
+         }
+      ],
+      'connect' => function(){},
+      'disconnect' => function(){}
+   ]);
 ?>
