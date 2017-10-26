@@ -6,7 +6,7 @@ var html = {
 
 var connect = new Connect({
    serverPath: './resources/server.php',
-   room: '0',
+   room: 'main',
    methods: {
       message: function(data){
          html.messages.innerHTML += `<message><name>${data.name}</name><text>: ${data.input}</text></message>`
