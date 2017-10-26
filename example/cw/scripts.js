@@ -1,21 +1,34 @@
 var connect = new Connect({
 	serverPath: './server/server.php',
-	room: '0',
+	room: 'main',
 	methods: {
+		connect: function(data){
+			console.log('connected: ' + data)
+			game.connected = true
+		},
+		newplayer: function(data){
+			var newPlayer = new Player(10, 10)
+			newPlayer.uid = data.uid
+			newPlayer.ghost = true
+			newPlayer.x = data.x
+			newPlayer.y = data.y
+			game.objects.push(newPlayer)
+		},
+		delplayer: function(data){
+			for(var player of game.objects){
+				if(player.uid == data){
+					player.dead = true
+				}
+			}
+		},
 		message: function(data){
 			for(var player of game.objects){
 				if(player.uid == data.uid){
 					player.keys = data.keys
-					return;
+					player.x = data.x
+					player.y = data.y
 				}
 			}
-
-			var newPlayer = new Player(10, 10)
-			newPlayer.uid = data.uid
-			newPlayer.ghost = true
-			newPlayer.keys = data.keys
-			console.log('new player: ' + data.uid)
-			game.objects.push(newPlayer)
 		}
 	}
 })
@@ -45,6 +58,7 @@ var game = {
 
 		this.ctx.clearRect(0, 0, this.ctx.canvas.width, this.ctx.canvas.height)
 		for(var object of this.objects){
+			if(object.dead) continue
 			object.step()
 			this.ctx.drawImage(object.img, object.x, object.y)
 		}
@@ -98,10 +112,12 @@ var Player = function(x, y){
 		if(keys.left && this.x > 0){ this.x -= 2; }
 
 		var newNetwork = game.keys[38]+'_'+game.keys[39]+'_'+game.keys[37]
-		if(this.network != newNetwork){
+		if(!this.ghost && game.connected && this.network != newNetwork){
 			this.network = newNetwork
-			connect.send({method: 'message', data: { keys: keys, uid: this.uid }})
-			console.log(newNetwork, this.network)
+			connect.send({
+				method: 'message',
+				data: { keys: keys, x: this.x, y: this.y, uid: this.uid }
+			})
 		}
 	}
 }
