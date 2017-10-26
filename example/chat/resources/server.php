@@ -8,12 +8,12 @@
    $connect = new Connect([
       'room' => $_GET['room'],
       'socket' => $_GET['socket'],
-      'data' => json_decode($_GET['data']),
+      'packet' => json_decode($_GET['packet']),
       'path' => 'Activity',
       'speed' => 1/30,
       'methods' => [
          'message' => function($connect, $socket, $data) {
-            $connect->broadcast($data);
+            $connect->broadcast($socket, ['method'=>'message', 'data'=>$data]);
          }
       ],
       'connect' => function(){},
